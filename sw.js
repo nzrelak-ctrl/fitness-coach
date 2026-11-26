@@ -1,5 +1,5 @@
 // Offline cache for the app shell. Bump VERSION whenever index.html changes.
-const VERSION = 'coach-v7';
+const VERSION = 'coach-v8';
 const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './restaurants.json'];
 
 self.addEventListener('install', e => {

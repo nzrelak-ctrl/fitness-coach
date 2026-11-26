@@ -1608,18 +1608,19 @@ function foodSheet(meal){
           body.querySelector('#fl').innerHTML=list.map(row).join(''); bind(); }; body.querySelector('#fq').oninput=draw; draw(); }
       if(s==='rest'){ body.innerHTML='<div class="empty">Loading menus…</div>'; const R=await loadRestaurants(), chains=Object.keys(R).sort((a,b)=>a.localeCompare(b));
         if(!chains.length){ body.innerHTML='<div class="empty">Restaurant menus need one online launch to download.</div>'; return; }
-        let chain=null;
-        body.innerHTML=`<input id="rq" placeholder="Search ${chains.length} restaurants — e.g. big mac, burrito bowl" style="margin:10px 0 8px"><div id="rc" class="chips" style="flex-wrap:wrap;margin-bottom:6px"></div><div id="rl"></div>
+        let chain=S.lastChain&&R[S.lastChain]?S.lastChain:'';
+        body.innerHTML=`<select id="rsel" style="margin:10px 0 8px;font-size:16px;font-weight:600"><option value="">Choose a restaurant…</option>${chains.map(c=>`<option ${c===chain?'selected':''}>${esc(c)}</option>`).join('')}</select>
+          <input id="rq" style="margin-bottom:6px"><div id="rl"></div>
           <div class="sub small" style="margin-top:10px">Values per menu item from fastfoodnutrition.org; chains change recipes, so treat them as close estimates.</div>`;
-        const draw=()=>{ const q=body.querySelector('#rq').value.toLowerCase().trim();
-          body.querySelector('#rc').innerHTML=(chain?`<button class="chip on" data-ch="">✕ ${esc(chain)}</button>`:chains.filter(c=>!q||c.toLowerCase().includes(q)).map(c=>`<button class="chip" data-ch="${esc(c)}">${esc(c)}</button>`).join(''));
-          body.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{ chain=b.dataset.ch||null; body.querySelector('#rq').value=''; draw(); });
+        const draw=()=>{ const q=body.querySelector('#rq').value.toLowerCase().trim(), words=q.split(/\s+/).filter(Boolean);
+          body.querySelector('#rq').placeholder=chain?`Search the ${chain} menu`:'…or search every restaurant';
           const pool=chain?R[chain].map(i=>({...i,chain})):Object.entries(R).flatMap(([c,its])=>its.map(i=>({...i,chain:c})));
-          const words=q.split(/\s+/).filter(Boolean);
-          const hits=(chain&&!q)?pool:q?pool.filter(i=>words.every(w=>(i.chain+' '+i.n).toLowerCase().includes(w))).slice(0,60):[];
+          const hits=words.length?pool.filter(i=>words.every(w=>((chain?'':i.chain+' ')+i.n).toLowerCase().includes(w))).slice(0,80):(chain?pool:[]);
           list=hits.map(i=>({name:`${i.chain} · ${i.n}`, serv:i.s, cal:i.cal, p:i.p, f:i.f, c:i.c}));
-          body.querySelector('#rl').innerHTML=list.length?list.map(row).join(''):(q?'<div class="empty">No match — try the Online tab.</div>':'');
+          body.querySelector('#rl').innerHTML=chain&&!words.length?`<div class="sub small" style="margin:4px 0 2px">${list.length} items</div>`+list.map(row).join('').replaceAll(`${esc(chain)} · `,'')
+            :list.length?list.map(row).join(''):(words.length?'<div class="empty">No match — try the Online tab.</div>':'<div class="empty">Pick a restaurant to see its menu.</div>');
           bind(); };
+        body.querySelector('#rsel').onchange=e=>{ chain=e.target.value; S.lastChain=chain; save(); body.querySelector('#rq').value=''; draw(); };
         body.querySelector('#rq').oninput=draw; draw(); }
       if(s==='online'){ body.innerHTML=`<div class="row" style="margin:10px 0 6px"><input id="oq" placeholder="Any food, brand or restaurant item" enterkeyhint="search"><button class="btn-green" id="ogo">Search</button></div>
           <div class="sub small">Searches the USDA FoodData Central database (packaged brands + restaurant foods). Needs internet.</div><div id="ol"></div>`;
