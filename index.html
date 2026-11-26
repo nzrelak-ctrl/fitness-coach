@@ -198,6 +198,53 @@ details>summary{list-style:none;cursor:pointer} details>summary::-webkit-details
 .food:first-child{border-top:0}
 .clock{font-size:66px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin:4px 0}
 .phase{text-align:center;font-size:14px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+/* ===== Coach look (v7): rounded type, squarer controls, bordered cards, floating dock ===== */
+html,body{font-family:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+button{border-radius:12px}
+.chip{border-radius:9px}
+.card,.excard,.hab{border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0)) ,var(--card)}
+.tile{border-radius:14px}
+.set,.lset{border-radius:12px}
+h1{font-size:28px;font-weight:750;letter-spacing:-.01em}
+.eyebrow{color:var(--green);text-transform:none;letter-spacing:0;font-weight:600;font-size:13.5px}
+h3{letter-spacing:.02em;text-transform:none;font-size:14px;font-weight:600}
+.round{border-radius:14px;width:44px;height:44px}
+.block{border-radius:14px}
+/* segmented control: underline tabs */
+.seg{background:transparent;border-radius:0;padding:0;border-bottom:1px solid var(--line);gap:4px}
+.seg button{border-radius:0;padding:10px 4px 12px;font-size:16px;position:relative}
+.seg button.on{background:transparent!important;color:var(--ink)!important;font-weight:650}
+.seg button.on::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:3px;background:var(--green)}
+/* week strip: rounded tiles */
+.week .days{gap:5px}
+.day{flex:1;flex-direction:column-reverse;gap:1px;background:var(--card2);border-radius:12px;padding:7px 0 6px;max-width:48px;position:relative}
+.day .c{width:auto;height:auto;background:none!important;box-shadow:none!important;transform:none!important;font-size:17px;font-weight:650;color:var(--ink)}
+.day .d{font-size:11px;font-weight:600;letter-spacing:.04em}
+.day .dot{position:absolute;bottom:-7px;left:50%;margin-left:-2.5px}
+.day.lift{background:var(--green-soft)} .day.lift .c,.day.lift .d{color:var(--green-ink)}
+.day.cardio{background:var(--blue)} .day.cardio .c,.day.cardio .d{color:var(--blue-ink)}
+.day.rest{background:transparent;box-shadow:inset 0 0 0 2px #8b7bd8} .day.rest .c{color:#c4b5fd}
+.day.sel{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--ink)}
+.day.full{background:var(--green)} .day.full .c,.day.full .d{color:var(--green-ink)}
+.day.part{background:var(--green-dim)}
+/* floating dock nav */
+nav{left:12px;right:12px;bottom:calc(8px + var(--safe-b));padding:6px;border-radius:22px;background:rgba(26,27,29,.92);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.45);max-width:536px;margin:0 auto}
+nav button{border-radius:16px;padding:7px 0 6px;font-size:11.5px;font-weight:600}
+nav button svg{width:23px;height:23px}
+nav button.on{background:rgba(var(--green-rgb),.16);color:var(--green)}
+body{padding-bottom:calc(96px + var(--safe-b))}
+#restbar{bottom:calc(86px + var(--safe-b));border-radius:16px;border:1px solid var(--line)}
+.fab{bottom:calc(88px + var(--safe-b))}
+.fab button{border-radius:14px}
+.lvlbar{height:10px;border-radius:6px;background:var(--card3);overflow:hidden}
+.lvlbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--green),var(--green-soft))}
+.hero{display:flex;gap:14px;align-items:center}
+.avatar{width:68px;height:68px;border-radius:20px;background:linear-gradient(135deg,var(--green),var(--green-dim));display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#fff;flex-shrink:0}
+.statrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.statrow div{background:var(--card2);border-radius:12px;padding:10px;text-align:left}
+.statrow b{display:block;font-size:17px} .statrow span{font-size:12px;color:var(--ink2)}
+.hedit{width:34px;height:34px;padding:0;border-radius:10px;background:rgba(238,59,54,.15);color:var(--red);font-size:16px;flex-shrink:0}
+#fs button{font-size:13.5px;padding:10px 2px 12px}
 </style>
 </head>
 <body>
@@ -964,45 +1011,31 @@ function ring(pct, size, stroke, color='var(--green)', track='var(--card3)'){
 }
 function renderProfile(v){
   const T=totals(), st=streak(), wkFrom=sunday(new Date()), ms=muscleSets(wkFrom), hit=Object.values(ms).filter(x=>x>0).length;
-  const h=S.habits[dkey()]||{}, ch=challenge(), name=S.profile.name||'athlete';
-  const lvlBars=[...Array(40)].map((_,i)=>`<i class="${i/40<T.pct?'on':''}"></i>`).join('');
+  const name=S.profile.name||'athlete';
   v.innerHTML=`
-    <div class="row between" style="margin:6px 0 0">
-      <button class="chip" style="font-size:20px;padding:10px 16px" id="streakBtn">${st} <span class="orange" style="display:inline-flex;width:20px">${ICON.flame}</span></button>
+    <div class="top"><div><div class="eyebrow">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</div><h1>Hi, ${esc(name)}</h1></div>
       <button class="round" id="gear">${ICON.gear}</button></div>
-    <div style="text-align:center;margin-top:-18px">
-      <div style="position:relative;width:110px;height:110px;margin:0 auto">${ring(T.pct,110,6)}
-        <div style="position:absolute;inset:12px;border-radius:50%;background:#e9e9ea;display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#9a9a9c">${esc(name[0].toUpperCase())}</div>
-        <div style="position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);background:var(--green);color:#fff;font-weight:700;border-radius:999px;padding:2px 10px;font-size:15px;border:3px solid var(--bg)">${T.level}</div></div>
-      <div style="font-size:22px;font-weight:500;margin-top:14px">@${esc(name)}</div>
-    </div>
-    <div class="row" style="justify-content:space-around;margin:18px 0 16px;text-align:center">
-      <div><div class="muted" style="width:22px;margin:0 auto">${ICON.clock}</div><div style="font-size:17px">${dur(T.minutes)}</div></div>
-      <div style="width:1px;height:34px;background:var(--card3)"></div>
-      <div><div class="muted" style="width:22px;margin:0 auto">${ICON.bell}</div><div style="font-size:17px">${big(T.volume)} lbs</div></div>
-      <div style="width:1px;height:34px;background:var(--card3)"></div>
-      <div><div class="muted" style="width:22px;margin:0 auto">${ICON.dumb}</div><div style="font-size:17px">${T.workouts} workouts</div></div>
-    </div>
-    <div class="card"><div class="row between"><h2>Muscles this week</h2></div>
-      <div style="font-size:30px;font-weight:600;color:var(--green);margin:2px 0 8px">${Math.round(hit/18*100)}%</div>
+    <div class="card"><div class="hero"><div class="avatar">${esc(name[0].toUpperCase())}</div>
+        <div class="grow" style="min-width:0"><div class="row between"><b style="font-size:19px">Level ${T.level}</b>
+          <button class="chip" id="streakBtn" style="background:rgba(255,107,20,.15);color:var(--orange);font-weight:700">${ICON.flame.replace('<svg','<svg width="15"')} ${st} day${st===1?'':'s'}</button></div>
+          <div class="lvlbar" style="margin:8px 0 4px"><i style="width:${Math.round(T.pct*100)}%"></i></div>
+          <div class="sub small">${Math.round(T.pct*100)}% to level ${T.level+1}</div></div></div>
+      <div class="statrow"><div><b>${T.workouts}</b><span>workouts</span></div><div><b>${big(T.volume)}</b><span>lbs lifted</span></div><div><b>${dur(T.minutes)}</b><span>training time</span></div></div></div>
+    <div class="card"><div class="row between"><h2>Muscle coverage</h2><span style="font-size:22px;font-weight:700;color:var(--green)">${Math.round(hit/18*100)}%</span></div>
+      <div class="sub small" style="margin:2px 0 6px">${hit} of 18 muscle groups trained this week · tap one for details</div>
       <div class="bodywrap">${bodySVG(weekColors())}</div></div>
-    <div class="card"><div class="row between" style="margin-bottom:16px"><h2>Week Overview</h2><button class="chip" id="startW" style="font-size:15px;padding:8px 14px">Start Workout</button></div>
+    <div class="card"><div class="row between" style="margin-bottom:16px"><h2>This week</h2><button class="btn-green" id="startW" style="font-size:15px;padding:8px 14px">Start workout</button></div>
       ${weekStrip(0,{id:'pw'})}</div>
     <div class="card"><div class="row between"><h2>Habits</h2><button class="chip" id="openHab" style="font-size:15px;padding:8px 14px">Open</button></div>
       ${(()=>{ const d=habitsDone(dkey()); return `<div class="row" style="gap:16px;margin-top:12px"><div style="position:relative;width:64px;height:64px">${ring(d.total?d.done/d.total:0,64,7)}<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700">${d.done}/${d.total}</div></div>
         <div class="grow"><div style="font-weight:600">${d.done===d.total&&d.total?'All habits done today 🎉':`${d.total-d.done} habit${d.total-d.done===1?'':'s'} left today`}</div><div class="sub small">${S.habitDefs.filter(h=>!habitHit(h,dkey())).slice(0,3).map(h=>h.icon+' '+esc(h.name)).join(' · ')}</div></div></div>`; })()}
       <div class="row between" style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px"><div><div class="sub small">Body weight</div><div style="font-size:20px;font-weight:700">${fw(latestWeight()||S.profile.bodyweight)} <span class="sub" style="font-size:14px">lbs · ${S.weights[dkey()]?'logged today':'not logged today'}</span></div></div>
         <button id="logW" style="padding:9px 14px;font-size:15px">Log weight</button></div></div>
-    <div class="card"><div class="row between"><h2>Level Progress</h2><span class="muted">${ICON.spark.replace('<svg','<svg width="20"')}</span></div>
-      <div class="row between" style="margin-top:14px"><span>lvl ${T.level} <span class="sub">· ${Math.round(T.pct*100)}%</span></span><span class="sub">lvl ${T.level+1}</span></div>
-      <div class="lvl">${lvlBars}</div></div>
-    <div class="card"><div class="row between"><h2>Streak Multiplier</h2><span class="chip" style="background:var(--orange);color:#fff;font-weight:700">${ICON.flame.replace('<svg','<svg width="16"')} ${st}</span></div>
+    <div class="card"><div class="row between"><h2>Streak</h2><span class="chip" style="background:var(--orange);color:#fff;font-weight:700">${ICON.flame.replace('<svg','<svg width="16"')} ${st}</span></div>
       <div class="sub" style="margin-top:4px">${dayType(dkey())?'Done for today — streak safe':st?'1 day left — train, log cardio or a rest day':'Start a new streak today'}</div>
       <div class="meter" style="margin-top:14px;height:10px"><i style="width:${Math.min(100,st/7*100)}%;background:var(--orange)"></i></div>
       <div class="sub small" style="margin-top:6px">x${(1+Math.min(st,10)*0.05).toFixed(2)} XP on your next workout</div></div>
-    <div style="height:70px"></div>`;
-  floating(`<div class="pill-ch"><div style="position:relative;width:34px;height:34px">${ring(ch.p(),34,4)}</div>
-    <div class="grow"><div style="font-weight:700;font-size:18px">Weekly challenges</div><div class="sub small">${esc(ch.t)} · ${Math.round(ch.p()*100)}%</div></div><span class="muted" style="font-size:22px">›</span></div>`);
+    <div style="height:10px"></div>`;
   $('#gear').onclick=()=>go('settings');
   $('#startW').onclick=()=>{ tab='workout'; startSheet(); render(); };
   $('#logW').onclick=weightSheet;
@@ -1016,7 +1049,7 @@ function setHabit(k,val,d=dkey()){ S.habits[d]={...(S.habits[d]||{}),[k]:val}; s
 /* =====================================================================
    HABITS TAB
    ===================================================================== */
-let habDay=dkey(), habWeekOff=0;
+let habDay=dkey(), habWeekOff=0, habEditMode=false;
 const HAB_TEMPLATES=[
   {name:'Reading',icon:'📖',type:'count',goal:20,unit:'min',step:5},{name:'Reading (pages)',icon:'📚',type:'count',goal:10,unit:'pages',step:5},
   {name:'Meditation',icon:'🧠',type:'count',goal:10,unit:'min',step:5},{name:'Journaling',icon:'✍️',type:'check'},
@@ -1034,9 +1067,10 @@ function habitStreak(h){ let n=0, d=new Date(); if(!habitHit(h,dkey(d))) d=addDa
 function renderHabits(v){
   const start=addDays(sunday(new Date()),habWeekOff*7), today=dkey();
   const days=[...Array(7)].map((_,i)=>{ const d=addDays(start,i), k=dkey(d), r=habitsDone(k), f=r.total?r.done/r.total:0, fut=d>new Date();
-    return `<button class="day ${k===today?'today':''} ${k===habDay?'sel':''}" data-hd="${k}"><span class="c" style="${fut?'':f>=1?'background:var(--green);color:var(--green-ink)':f>0?'background:var(--green-dim);color:#fff':''}">${d.getDate()}</span><span class="d">${DOW[i]}</span><span class="dot"></span></button>`; }).join('');
+    return `<button class="day ${k===today?'today':''} ${k===habDay?'sel':''} ${fut?'':f>=1?'full':f>0?'part':''}" data-hd="${k}"><span class="c">${d.getDate()}</span><span class="d">${DOW[i]}</span><span class="dot"></span></button>`; }).join('');
   const D=habitsDone(habDay), fut=parseKey(habDay)>new Date();
-  v.innerHTML=`<div class="top"><div><div class="eyebrow">${longDate(parseKey(habDay))}</div><h1>Habits</h1></div><button class="btn-green" id="addH" style="padding:12px 18px">+ Add</button></div>
+  v.innerHTML=`<div class="top"><div><div class="eyebrow">${longDate(parseKey(habDay))}</div><h1>Habits</h1></div><div class="row" style="gap:8px"><button id="editH" style="padding:12px 14px">${habEditMode?'Done':'Edit'}</button><button class="btn-green" id="addH" style="padding:12px 16px">+ Add</button></div></div>
+    ${habEditMode?`<div class="coachline" style="margin:0 0 12px">Tap ✕ to delete a habit, or ↑ to move it up. Past check-ins stay in your backups.</div>`:''}
     <div class="week"><button class="chev" data-hw="-1">‹</button><div class="days">${days}</div><button class="chev" data-hw="1">›</button></div>
     <div class="card" style="margin-top:14px"><div class="row" style="gap:16px"><div style="position:relative;width:76px;height:76px">${ring(D.total?D.done/D.total:0,76,8)}
       <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700">${D.total?Math.round(D.done/D.total*100):0}%</div></div>
@@ -1050,13 +1084,16 @@ function renderHabits(v){
       return `<div class="hab"><div class="row" style="gap:12px"><div class="ic">${h.icon}</div>
         <div class="grow tap" data-he="${i}" style="min-width:0"><div class="nm">${esc(h.name)} ${hit?'<span class="green">✓</span>':''}</div>
           <div class="sub small">${h.type==='check'?'Daily':`${h.lower?'Under':'Goal'} ${h.goal.toLocaleString()} ${esc(h.unit)}`}${st?` · <span class="orange">🔥 ${st}</span>`:''}</div></div>
-        <div class="ctl">${ctl}</div></div>
+        ${habEditMode?`<div class="row" style="gap:6px"><button data-hup="${i}" style="width:34px;height:34px;padding:0">↑</button><button class="hedit" data-hdel="${i}">✕</button></div>`:`<div class="ctl">${ctl}</div>`}</div>
         ${h.type!=='check'?`<div class="meter" style="margin-top:10px;height:6px"><i style="width:${Math.round(habitPart(h,habDay)*100)}%"></i></div>`:''}
         <div class="hdots">${dots}</div></div>`; }).join('')}
     <div style="height:30px"></div>`;
   $$('[data-hw]').forEach(b=>b.onclick=()=>{ habWeekOff+=+b.dataset.hw; render(); });
   $$('[data-hd]').forEach(b=>b.onclick=()=>{ habDay=b.dataset.hd; render(); });
   $('#addH').onclick=()=>habitEdit(null);
+  $('#editH').onclick=()=>{ habEditMode=!habEditMode; render(); };
+  $$('[data-hdel]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.hdel, h=S.habitDefs[i]; if(confirm(`Delete "${h.name}"?`)){ S.habitDefs.splice(i,1); save(); toast(`${h.name} deleted`); render(); } });
+  $$('[data-hup]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.hup; if(i>0){ [S.habitDefs[i-1],S.habitDefs[i]]=[S.habitDefs[i],S.habitDefs[i-1]]; save(); render(); } });
   $$('[data-hc]').forEach(b=>b.onclick=()=>{ const h=S.habitDefs[+b.dataset.hc]; setHabit(h.id,!habVal(h,habDay),habDay); render(); });
   $$('[data-hm]').forEach(b=>b.onclick=()=>{ const h=S.habitDefs[+b.dataset.hm]; setHabit(h.id,Math.max(0,(+habVal(h,habDay)||0)+(+b.dataset.dir)*(h.step||1)),habDay); render(); });
   $$('[data-hn]').forEach(i=>i.onchange=()=>{ const h=S.habitDefs[+i.dataset.hn], x=parseFloat(i.value); setHabit(h.id,isNaN(x)?null:x,habDay); render(); });
@@ -1105,7 +1142,7 @@ function renderWorkout(v){
       <div class="tiles" style="position:relative;z-index:1"><div class="tile"><div class="lbl"><span class="green">⏸︎</span> Volume</div><div class="val">${big(wVol(w))} lbs</div></div>
         <div class="tile"><div class="lbl"><span class="green" style="width:18px;display:inline-flex">${ICON.clock}</span> Time</div><div class="val">${dur(wMin(w))}</div></div></div>
       ${ws.map(w=>`<div class="tap" data-open="${w.id}"><h1 style="margin:22px 0 14px">${esc(w.name).split("/").join("/<wbr>")}</h1>
-        <div style="border-top:1px solid var(--line);padding-top:16px" class="row between"><h3>Session breakdown</h3><span class="sub">${w.exercises.length} exercises</span></div>
+        <div style="border-top:1px solid var(--line);padding-top:16px" class="row between"><h3>Exercises</h3><span class="sub">${w.exercises.length} exercises</span></div>
         ${w.exercises.map(e=>{ const t=topSet(e); return `<div class="li"><div class="t">${esc(e.name)}</div><div class="s">${e.sets.length} sets · top set ${fw(t.w)} lbs × ${t.r}</div></div>`; }).join('')}</div>`).join('')}`;
   }
   if(cs.length) body+=cs.map(c=>`<div class="card" style="margin-top:14px"><div class="row between"><div><div class="blue small" style="font-weight:600">CARDIO</div><h2>${esc(c.type)}</h2></div>
@@ -1173,7 +1210,7 @@ function renderDetail(v,id){
       ${recap(w).map(l=>`<div class="li" style="font-size:15px">${l}</div>`).join('')}</div>
     ${w.exercises.map(e=>setCards(e)).join('')}
     <div style="height:80px"></div>`;
-  floating(`<div class="fab"><button class="btn-red" id="del">Delete Workout</button><button class="btn-white" id="share"><span style="display:inline-flex;width:20px;vertical-align:-4px">${ICON.share}</span> Share</button></div>`);
+  floating(`<div class="fab"><button id="del" style="background:var(--card2);color:var(--red);border:1px solid rgba(238,59,54,.4)">Delete</button><button class="btn-green" id="share"><span style="display:inline-flex;width:20px;vertical-align:-4px">${ICON.share}</span> Share</button></div>`);
   $('#back').onclick=()=>go('workout');
   $('#edit').onclick=()=>{ if(S.active){ toast('Finish your current workout first'); return; }
     S.active=JSON.parse(JSON.stringify({...w, editing:w.id, exercises:w.exercises.map(e=>({...e, tmpl:null, note:'', sets:e.sets.map(s=>({...s,done:true}))}))})); save(); go('workout'); };
@@ -1536,32 +1573,75 @@ function renderNutrition(v){
   $('#planB').onclick=planSheet; $('#wB').onclick=weightSheet;
 }
 function guessMeal(){ const h=new Date().getHours(); return h<11?'Breakfast':h<15?'Lunch':h<20?'Dinner':'Snacks'; }
+/* restaurant menus: restaurants.json (per-serving nutrition from fastfoodnutrition.org, built Nov 2026) */
+let REST=null;
+async function loadRestaurants(){ if(REST) return REST; try{ REST=await (await fetch('restaurants.json')).json(); }catch(e){ REST={}; } return REST; }
+/* online search: USDA FoodData Central (branded + restaurant foods). Free key from api.data.gov raises the limit. */
+async function fdcSearch(q){
+  const key=S.settings.fdcKey||'DEMO_KEY';
+  const url=`https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${encodeURIComponent(key)}&pageSize=25&query=${encodeURIComponent(q)}&dataType=${encodeURIComponent('Branded,Survey (FNDDS),SR Legacy')}`;
+  const r=await fetch(url); if(r.status===429) throw new Error('limit'); if(!r.ok) throw new Error('http');
+  const d=await r.json();
+  return (d.foods||[]).map(f=>{ const n=id=>{ const x=(f.foodNutrients||[]).find(z=>z.nutrientId===id); return x?x.value:0; };
+    let kcal=n(1008)||n(2047)||n(2048); const per100={cal:kcal,p:n(1003),f:n(1004),c:n(1005)};
+    const g=(f.servingSize&&/^(g|grm|ml|mlt)$/i.test(f.servingSizeUnit||''))?+f.servingSize:null;
+    const brand=f.brandName||f.brandOwner||'';
+    return { name:(brand?brand.replace(/\b\w/g,ch=>ch.toUpperCase()).replace(/\B\w+/g,w=>w.toLowerCase())+' · ':'')+f.description.toLowerCase().replace(/(^|[\s,(])\w/g,ch=>ch.toUpperCase()),
+      per100, g, serv:f.householdServingFullText||'', cat:f.foodCategory||f.dataType };
+  }).filter(f=>f.per100.cal>0);
+}
 function foodSheet(meal){
   const m=sheet(`<h2>Add to ${meal.toLowerCase()}</h2>
-    <div class="seg" id="fs"><button class="on" data-s="recent">Recent</button><button data-s="foods">Foods</button><button data-s="custom">Custom</button></div>
+    <div class="seg" id="fs"><button data-s="recent">Recent</button><button data-s="rest">Restaurants</button><button data-s="foods">Foods</button><button data-s="online">Online</button><button data-s="custom">Custom</button></div>
     <div id="fbody"></div>`, m=>{
     const add=(f,q=1)=>{ (S.food[nutDay]=S.food[nutDay]||[]).push({meal,name:f.name,cal:+f.cal,p:+f.p,f:+f.f,c:+f.c,q});
-      S.recentFoods=[{name:f.name,cal:+f.cal,p:+f.p,f:+f.f,c:+f.c},...S.recentFoods.filter(r=>r.name!==f.name)].slice(0,30); save(); m.remove(); toast(`${f.name} added`); render(); };
-    const row=(f,i)=>`<div class="food"><div class="grow"><div style="font-weight:500">${esc(f.name)}</div><div class="sub small">${f.serv?esc(f.serv)+' · ':''}${Math.round(f.cal)} cal · P ${f.p} · F ${f.f} · C ${f.c}</div></div>
-       <input type="number" step="0.25" value="1" data-q="${i}" style="width:62px;text-align:center;padding:8px 4px"><button class="btn-green" data-pick="${i}" style="padding:8px 14px">Add</button></div>`;
-    const show=s=>{ m.querySelectorAll('#fs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s)); const body=m.querySelector('#fbody');
-      let list=[];
-      if(s==='recent'){ list=S.recentFoods; body.innerHTML=list.length?list.map(row).join(''):'<div class="empty">Foods you add show up here for one-tap logging.</div>'; }
-      if(s==='foods'){ body.innerHTML=`<input id="fq" placeholder="Search foods" style="margin-bottom:6px"><div id="fl"></div>`;
+      S.recentFoods=[{name:f.name,serv:f.serv||'',cal:+f.cal,p:+f.p,f:+f.f,c:+f.c},...S.recentFoods.filter(r=>r.name!==f.name)].slice(0,40); save(); m.remove(); toast(`${f.name} added`); render(); };
+    const row=(f,i)=>`<div class="food"><div class="grow" style="min-width:0"><div style="font-weight:500">${esc(f.name)}</div><div class="sub small">${f.serv?esc(f.serv)+' · ':''}${Math.round(f.cal)} cal · P ${Math.round(f.p)} · F ${Math.round(f.f)} · C ${Math.round(f.c)}</div></div>
+       <input type="number" step="0.25" value="1" data-q="${i}" style="width:58px;text-align:center;padding:8px 4px"><button class="btn-green" data-pick="${i}" style="padding:8px 12px">Add</button></div>`;
+    let list=[];
+    const body=m.querySelector('#fbody');
+    const bind=()=>body.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.pick; add(list[i], +body.querySelector(`[data-q="${i}"]`).value||1); });
+    const show=async s=>{ m.querySelectorAll('#fs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+      if(s==='recent'){ list=S.recentFoods; body.innerHTML=list.length?list.map(row).join(''):'<div class="empty">Foods you add show up here for one-tap logging.</div>'; bind(); }
+      if(s==='foods'){ body.innerHTML=`<input id="fq" placeholder="Search basic foods" style="margin:10px 0 6px"><div id="fl"></div>`;
         const draw=()=>{ const q=body.querySelector('#fq').value.toLowerCase(); list=FOODS.filter(f=>f[0].toLowerCase().includes(q)).map(f=>({name:f[0],serv:f[1],cal:f[2],p:f[3],f:f[4],c:f[5]}));
-          body.querySelector('#fl').innerHTML=list.map(row).join(''); bind(); }; body.querySelector('#fq').oninput=draw; draw(); return; }
-      if(s==='custom'){ body.innerHTML=`<label class="f"><span>Food name</span><input id="cn" placeholder="e.g. Chipotle bowl"></label>
+          body.querySelector('#fl').innerHTML=list.map(row).join(''); bind(); }; body.querySelector('#fq').oninput=draw; draw(); }
+      if(s==='rest'){ body.innerHTML='<div class="empty">Loading menus…</div>'; const R=await loadRestaurants(), chains=Object.keys(R).sort((a,b)=>a.localeCompare(b));
+        if(!chains.length){ body.innerHTML='<div class="empty">Restaurant menus need one online launch to download.</div>'; return; }
+        let chain=null;
+        body.innerHTML=`<input id="rq" placeholder="Search ${chains.length} restaurants — e.g. big mac, burrito bowl" style="margin:10px 0 8px"><div id="rc" class="chips" style="flex-wrap:wrap;margin-bottom:6px"></div><div id="rl"></div>
+          <div class="sub small" style="margin-top:10px">Values per menu item from fastfoodnutrition.org; chains change recipes, so treat them as close estimates.</div>`;
+        const draw=()=>{ const q=body.querySelector('#rq').value.toLowerCase().trim();
+          body.querySelector('#rc').innerHTML=(chain?`<button class="chip on" data-ch="">✕ ${esc(chain)}</button>`:chains.filter(c=>!q||c.toLowerCase().includes(q)).map(c=>`<button class="chip" data-ch="${esc(c)}">${esc(c)}</button>`).join(''));
+          body.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{ chain=b.dataset.ch||null; body.querySelector('#rq').value=''; draw(); });
+          const pool=chain?R[chain].map(i=>({...i,chain})):Object.entries(R).flatMap(([c,its])=>its.map(i=>({...i,chain:c})));
+          const words=q.split(/\s+/).filter(Boolean);
+          const hits=(chain&&!q)?pool:q?pool.filter(i=>words.every(w=>(i.chain+' '+i.n).toLowerCase().includes(w))).slice(0,60):[];
+          list=hits.map(i=>({name:`${i.chain} · ${i.n}`, serv:i.s, cal:i.cal, p:i.p, f:i.f, c:i.c}));
+          body.querySelector('#rl').innerHTML=list.length?list.map(row).join(''):(q?'<div class="empty">No match — try the Online tab.</div>':'');
+          bind(); };
+        body.querySelector('#rq').oninput=draw; draw(); }
+      if(s==='online'){ body.innerHTML=`<div class="row" style="margin:10px 0 6px"><input id="oq" placeholder="Any food, brand or restaurant item" enterkeyhint="search"><button class="btn-green" id="ogo">Search</button></div>
+          <div class="sub small">Searches the USDA FoodData Central database (packaged brands + restaurant foods). Needs internet.</div><div id="ol"></div>`;
+        const go=async()=>{ const q=body.querySelector('#oq').value.trim(); if(!q) return; const ol=body.querySelector('#ol'); ol.innerHTML='<div class="empty">Searching…</div>';
+          let res; try{ res=await fdcSearch(q); }catch(e){ ol.innerHTML=`<div class="empty">${e.message==='limit'?'Hourly search limit reached. Add a free API key in Settings → Nutrition to search more.':'Couldn\'t reach the food database — are you online?'}</div>`; return; }
+          if(!res.length){ ol.innerHTML='<div class="empty">No results.</div>'; return; }
+          ol.innerHTML=res.map((f,i)=>`<div class="food"><div class="grow" style="min-width:0"><div style="font-weight:500">${esc(f.name)}</div>
+              <div class="sub small">${esc(f.cat)} · per 100 g: ${Math.round(f.per100.cal)} cal · P ${Math.round(f.per100.p)} · F ${Math.round(f.per100.f)} · C ${Math.round(f.per100.c)}${f.serv?` · serving ${esc(f.serv)}`:''}</div></div>
+              <input type="number" value="${f.g||100}" data-og="${i}" style="width:66px;text-align:center;padding:8px 4px"><span class="sub small">g</span><button class="btn-green" data-op="${i}" style="padding:8px 12px">Add</button></div>`).join('');
+          ol.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{ const f=res[+b.dataset.op], g=+ol.querySelector(`[data-og="${b.dataset.op}"]`).value||100, k=g/100;
+            add({name:f.name, serv:`${g} g`, cal:Math.round(f.per100.cal*k), p:+(f.per100.p*k).toFixed(1), f:+(f.per100.f*k).toFixed(1), c:+(f.per100.c*k).toFixed(1)}); }); };
+        body.querySelector('#ogo').onclick=go; body.querySelector('#oq').onkeydown=e=>{ if(e.key==='Enter') go(); }; }
+      if(s==='custom'){ body.innerHTML=`<div style="height:10px"></div><label class="f"><span>Food name</span><input id="cn" placeholder="e.g. Local diner burger"></label>
           <div class="row"><label class="f grow"><span>Calories</span><input type="number" id="ccal" inputmode="numeric"></label><label class="f grow"><span>Protein g</span><input type="number" id="cp" inputmode="decimal"></label></div>
           <div class="row"><label class="f grow"><span>Fat g</span><input type="number" id="cf" inputmode="decimal"></label><label class="f grow"><span>Carbs g</span><input type="number" id="cc" inputmode="decimal"></label></div>
           <button class="block btn-green" id="cadd">Add</button>`;
         body.querySelector('#cadd').onclick=()=>{ const n=body.querySelector('#cn').value.trim()||'Quick add', cal=+body.querySelector('#ccal').value||0,
           p=+body.querySelector('#cp').value||0, f=+body.querySelector('#cf').value||0, c=+body.querySelector('#cc').value||0;
-          add({name:n, cal:cal||Math.round(p*4+c*4+f*9), p,f,c}); }; return; }
-      bind();
-      function bind(){ body.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.pick; add(list[i], +body.querySelector(`[data-q="${i}"]`).value||1); }); }
+          add({name:n, cal:cal||Math.round(p*4+c*4+f*9), p,f,c}); }; }
     };
     m.querySelectorAll('#fs button').forEach(b=>b.onclick=()=>show(b.dataset.s));
-    show(S.recentFoods.length?'recent':'foods');
+    show(S.recentFoods.length?'recent':'rest');
   });
 }
 /* Adaptive calorie targets: weekly check-in against the real weight trend */
@@ -1632,7 +1712,7 @@ function statsOverview(el){
   const start=addDays(sunday(new Date()),-12*7); let cells='';
   for(let r=0;r<7;r++) for(let c=0;c<13;c++){ const day=addDays(start,c*7+r), k=dkey(day), t=dayType(k); cells+=`<i class="${day>new Date()?'f':t==='lift'?'l':t==='cardio'?'c':t==='rest'?'r':''}" title="${k}"></i>`; }
   const last=sortedW().pop();
-  el.innerHTML=`<div class="card" style="padding:22px 18px"><div class="row between"><div><h2 style="font-size:22px">Your Coach Score</h2>
+  el.innerHTML=`<div class="card" style="padding:22px 18px"><div class="row between"><div><h2 style="font-size:22px">Coach score</h2>
       <div class="sub">${{gain:'Gain Muscle',maintain:'Maintain',lose:'Lose Fat'}[S.profile.goal]} · Training</div></div></div>
     <div style="position:relative;width:230px;height:230px;margin:18px auto 8px">${ring(sc.total/100,230,24)}
       <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
@@ -1788,6 +1868,9 @@ function renderSettings(v){
       <div class="row" style="flex-wrap:wrap;gap:12px">${Object.entries(ACCENTS).map(([k,a])=>`<button data-acc="${k}" title="${k}" style="width:42px;height:42px;padding:0;background:${a[0]};box-shadow:${(st.accent||'green')===k?'0 0 0 3px var(--bg),0 0 0 5px #fff':'none'}"></button>`).join('')}</div>
       <div class="sub small" style="margin:16px 0 8px">Background</div>
       <div class="row" style="flex-wrap:wrap;gap:8px">${Object.entries(BGS).map(([k,b])=>`<button data-bg="${k}" class="chip ${(st.bg||'black')===k?'on':''}" style="padding:8px 14px"><span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${b[2]};border:1px solid #555"></span>${b[0]}</button>`).join('')}</div></div>
+    <div class="card"><h3 style="margin-bottom:8px">Nutrition search</h3>
+      <div class="sub small" style="margin-bottom:10px">The Online food search uses USDA FoodData Central. Without a key it allows a few searches per hour; a free key from api.data.gov/signup allows 1,000/hour.</div>
+      <label class="f"><span>API key (optional)</span><input id="fdck" value="${esc(st.fdcKey||'')}" placeholder="DEMO_KEY" autocomplete="off" autocapitalize="off"></label></div>
     <div class="card"><h3 style="margin-bottom:12px">Training</h3>
       <label class="f"><span>Weekly workout target</span><input type="number" id="wt" value="${st.weeklyTarget}"></label>
       <label class="f"><span>Rest between sets (seconds)</span><input type="number" id="rs" value="${st.rest}"></label>
@@ -1805,6 +1888,7 @@ function renderSettings(v){
   num('#page',x=>P.age=x); $('#psex').onchange=e=>{ P.sex=e.target.value; save(); };
   const ht=()=>{ const f=+$('#pft').value||0, i=+$('#pin').value||0; P.heightIn=f||i?f*12+i:null; save(); }; $('#pft').onchange=ht; $('#pin').onchange=ht;
   $('#routB').onclick=routinesSheet;
+  $('#fdck').onchange=e=>{ st.fdcKey=e.target.value.trim(); save(); };
   $$('[data-acc]').forEach(b=>b.onclick=()=>{ st.accent=b.dataset.acc; save(); applyTheme(); render(); });
   $$('[data-bg]').forEach(b=>b.onclick=()=>{ st.bg=b.dataset.bg; save(); applyTheme(); render(); });
   $('#exp').onclick=()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'})); a.download=`coach-backup-${dkey()}.json`; a.click(); };
